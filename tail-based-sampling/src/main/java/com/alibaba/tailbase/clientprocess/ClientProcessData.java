@@ -105,6 +105,7 @@ public class ClientProcessData implements Runnable {
                     // TODO to use lock/notify
                     if (traceMap.size() > 0) {
                         while (true) {
+                            LOGGER.info("client process sleep 10 millis");
                             Thread.sleep(10);
                             if (traceMap.size() == 0) {
                                 break;
