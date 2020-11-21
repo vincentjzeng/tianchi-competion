@@ -74,26 +74,25 @@ public class ClientProcessData implements Runnable {
             Map<String, List<String>> traceMap = BATCH_TRACE_LIST.get(pos);
             while ((line = bf.readLine()) != null) {
                 count++;
-                String[] cols = line.split("\\|");
-                if (cols != null && cols.length > 1 ) {
-                    String traceId = cols[0];
-                    List<String> spanList = traceMap.get(traceId);
-                    if (spanList == null) {
-                        spanList = new ArrayList<>();
-                        traceMap.put(traceId, spanList);
-                    }
-                    spanList.add(line);
-                    if (cols.length > 8) {
-                        String tags = cols[8];
-                        if (tags != null) {
-                            if (tags.contains("error=1")) {
-                                badTraceIdList.add(traceId);
-                            } else if (tags.contains("http.status_code=") && tags.indexOf("http.status_code=200") < 0) {
-                                badTraceIdList.add(traceId);
-                            }
-                        }
+                //String[] cols = line.split("\\|");
+                String traceId = line.substring(0,line.indexOf("|"));
+                String tags = line.substring(line.lastIndexOf("|"));
+
+                List<String> spanList = traceMap.get(traceId);
+                if (spanList == null) {
+                    spanList = new ArrayList<>();
+                    traceMap.put(traceId, spanList);
+                }
+                spanList.add(line);
+
+                if (tags != null) {
+                    if (tags.contains("error=1")) {
+                        badTraceIdList.add(traceId);
+                    } else if (tags.contains("http.status_code=") && tags.indexOf("http.status_code=200") < 0) {
+                        badTraceIdList.add(traceId);
                     }
                 }
+
                 if (count % Constants.BATCH_SIZE == 0) {
                     pos++;
                     // loop cycle
